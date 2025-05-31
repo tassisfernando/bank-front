@@ -1,0 +1,23 @@
+<div class="login-container">
+  <div class="logo-placeholder">
+    <!-- Espaço reservado para a logo -->
+    <span>Logo aqui</span>
+  </div>
+  <h2>Bem-vindo ao Digital</h2>
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="cpf">CPF</label>
+      <input id="cpf" type="text" name="cpf" maxlength="14" [(ngModel)]="customer.cpf" required>
+      <div *ngIf="customer.cpf && !cpfIsValidField()" class="error">CPF inválido</div>
+    </div>
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input id="password" type="password" name="password" [(ngModel)]="customer.password" required>
+    </div>
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+    <button type="submit" class="login-btn">Entrar</button>
+  </form>
+  <button class="create-account-btn" type="button" (click)="createAccount()">
+    Criar nova conta
+  </button>
+</div>

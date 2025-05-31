@@ -1,0 +1,45 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="logo-section">
+      <div class="logo-placeholder">
+        <!-- Espaço reservado para a logo -->
+        <span>Logo aqui</span>
+      </div>
+    </div>
+    
+    <div class="user-section">
+      <span class="welcome-text">Olá, {{ userName }}</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="actions-grid">
+      <button class="action-btn create-account" (click)="createAccount()">
+        <span class="btn-icon">👤</span>
+        <span class="btn-text">Criar Conta</span>
+      </button>
+      
+      <button class="action-btn withdraw" (click)="withdraw()">
+        <span class="btn-icon">💸</span>
+        <span class="btn-text">Sacar</span>
+      </button>
+      
+      <button class="action-btn deposit" (click)="deposit()">
+        <span class="btn-icon">💰</span>
+        <span class="btn-text">Depositar</span>
+      </button>
+      
+      <button class="action-btn statement" (click)="viewStatement()">
+        <span class="btn-icon">📄</span>
+        <span class="btn-text">Ver Extrato</span>
+      </button>
+      
+      <button class="action-btn logout" (click)="logout()">
+        <span class="btn-icon">🚪</span>
+        <span class="btn-text">Sair</span>
+      </button>
+    </div>
+  </main>
+</div>

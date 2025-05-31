@@ -1,0 +1,101 @@
+<div class="register-container">
+  <div class="logo-placeholder">
+    <!-- Espaço reservado para a logo -->
+    <span>Logo aqui</span>
+  </div>
+  <h2>Criar Nova Conta</h2>
+  <form #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)">
+    <div class="form-group">
+      <label for="name">Nome Completo</label>
+      <input 
+        id="name" 
+        type="text" 
+        name="name" 
+        [(ngModel)]="customer.name"
+        placeholder="Digite seu nome completo" 
+        required 
+        #name="ngModel">
+      <div *ngIf="name.invalid && name.touched" class="error">
+        Nome é obrigatório
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="cpf">CPF</label>
+      <input 
+        id="cpf" 
+        type="text" 
+        name="cpf" 
+        [(ngModel)]="customer.cpf"
+        maxlength="14" 
+        placeholder="000.000.000-00" 
+        required 
+        #cpf="ngModel">
+      <div *ngIf="cpf.invalid && cpf.touched" class="error">
+        CPF é obrigatório
+      </div>
+      <div *ngIf="cpf.touched && customer.cpf && !cpfIsValidField()" class="error">
+        CPF inválido
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Telefone</label>
+      <input 
+        id="phone" 
+        type="tel" 
+        name="phone" 
+        [(ngModel)]="customer.phone"
+        (input)="onPhoneInput()"
+        placeholder="(31) 99999-9999" 
+        required 
+        #phone="ngModel">
+      <div *ngIf="phone.invalid && phone.touched" class="error">
+        Telefone é obrigatório
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input 
+        id="password" 
+        type="password" 
+        name="password" 
+        [(ngModel)]="customer.password"
+        placeholder="Digite sua senha" 
+        required 
+        minlength="6"
+        #password="ngModel">
+      <div *ngIf="password.invalid && password.touched" class="error">
+        <div *ngIf="password.errors?.['required']">Senha é obrigatória</div>
+        <div *ngIf="password.errors?.['minlength']">Senha deve ter pelo menos 6 caracteres</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="confirmPassword">Confirmar Senha</label>
+      <input 
+        id="confirmPassword" 
+        type="password" 
+        name="confirmPassword" 
+        [(ngModel)]="confirmPassword"
+        placeholder="Digite novamente sua senha" 
+        required 
+        #confirmPass="ngModel">
+      <div *ngIf="confirmPass.touched && !passwordsMatch()" class="error">
+        As senhas não conferem
+      </div>
+    </div>
+
+    <button 
+      type="submit" 
+      class="register-btn"
+      [disabled]="registerForm.invalid || !passwordsMatch() || !cpfIsValidField()">
+      Criar Conta
+    </button>
+  </form>
+
+  <button class="back-btn" type="button" (click)="goBackToLogin()">
+    Voltar ao Login
+  </button>
+</div>

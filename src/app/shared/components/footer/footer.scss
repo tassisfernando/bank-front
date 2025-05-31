@@ -1,0 +1,16 @@
+.footer {
+  background: #222;
+  color: #fff;
+  padding: 16px 0;
+  text-align: center;
+}
+.footer .container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+.address {
+  font-size: 0.95em;
+  opacity: 0.8;
+}
