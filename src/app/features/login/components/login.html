@@ -9,10 +9,13 @@
       <label for="cpf">CPF</label>
       <input 
         id="cpf" 
-        type="text" 
+        type="tel" 
         name="cpf" 
         maxlength="14" 
-        [(ngModel)]="customer.cpf" 
+        [(ngModel)]="customer.cpf"
+        (input)="onCpfInput($event)"
+        (keypress)="onKeyPress($event)"
+        placeholder="000.000.000-00"
         required
         [disabled]="isLoading">
       <div *ngIf="customer.cpf && !cpfIsValidField()" class="error">CPF inválido</div>

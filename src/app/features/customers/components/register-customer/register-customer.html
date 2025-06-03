@@ -5,7 +5,6 @@
   <h2>Criar Nova Conta</h2>
   
   <form #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)">
-    <!-- Campos do formulário existentes... -->
     <div class="form-group">
       <label for="name">Nome Completo</label>
       <input 
@@ -14,7 +13,8 @@
         name="name" 
         [(ngModel)]="customer.name" 
         required 
-        #name="ngModel">
+        #name="ngModel"
+        [disabled]="isLoading">
       <div *ngIf="name.invalid && name.touched" class="error">
         Nome é obrigatório
       </div>
@@ -24,12 +24,16 @@
       <label for="cpf">CPF</label>
       <input 
         id="cpf" 
-        type="text" 
+        type="tel" 
         name="cpf" 
         maxlength="14" 
-        [(ngModel)]="customer.cpf" 
+        [(ngModel)]="customer.cpf"
+        (input)="onCpfInput($event)"
+        (keypress)="onKeyPress($event)"
+        placeholder="000.000.000-00"
         required
-        #cpf="ngModel">
+        #cpf="ngModel"
+        [disabled]="isLoading">
       <div *ngIf="cpf.touched && !cpfIsValidField()" class="error">
         CPF inválido
       </div>
@@ -39,12 +43,16 @@
       <label for="telephone">Telefone</label>
       <input 
         id="telephone" 
-        type="text" 
+        type="tel" 
         name="telephone" 
+        maxlength="15"
         [(ngModel)]="customer.telephone" 
-        (input)="onPhoneInput()"
+        (input)="onPhoneInput($event)"
+        (keypress)="onKeyPress($event)"
+        placeholder="(11) 99999-9999"
         required
-        #telephone="ngModel">
+        #telephone="ngModel"
+        [disabled]="isLoading">
       <div *ngIf="telephone.invalid && telephone.touched" class="error">
         Telefone é obrigatório
       </div>
@@ -59,7 +67,8 @@
         [(ngModel)]="customer.password" 
         required
         minlength="6"
-        #password="ngModel">
+        #password="ngModel"
+        [disabled]="isLoading">
       <div *ngIf="password.invalid && password.touched" class="error">
         <div *ngIf="password.errors?.['required']">Senha é obrigatória</div>
         <div *ngIf="password.errors?.['minlength']">Senha deve ter pelo menos 6 caracteres</div>
@@ -73,7 +82,8 @@
         type="password" 
         name="confirmPassword" 
         [(ngModel)]="confirmPassword" 
-        required>
+        required
+        [disabled]="isLoading">
       <div *ngIf="confirmPassword && !passwordsMatch()" class="error">
         As senhas não coincidem
       </div>

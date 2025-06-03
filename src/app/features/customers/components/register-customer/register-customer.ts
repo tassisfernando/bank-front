@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { cpfIsValid, maskPhone } from '../../../../shared/utils/validators';
 import { Customer } from '../../../../shared/models/customer.model';
 import { CustomerService } from '../../services/customer.service';
 import { ErrorHandlerService } from '../../../../shared/services/error-handler.service';
+import { FormHelperService } from '../../../../shared/services/form-helper.service';
 
 @Component({
   selector: 'app-register-customer',
@@ -29,11 +29,33 @@ export class RegisterCustomer {
   constructor(
     private router: Router,
     private customerService: CustomerService,
-    private errorHandler: ErrorHandlerService
+    private errorHandler: ErrorHandlerService,
+    private formHelper: FormHelperService
   ) {}
 
+  // Métodos delegados para o FormHelperService
+  onCpfInput(event: any) {
+    this.formHelper.onCpfInput(event, (value) => {
+      this.customer.cpf = value;
+    });
+  }
+
+  onPhoneInput(event: any) {
+    this.formHelper.onPhoneInput(event, (value) => {
+      this.customer.telephone = value;
+    });
+  }
+
+  onKeyPress(event: KeyboardEvent): boolean {
+    return this.formHelper.onKeyPress(event);
+  }
+
+  cpfIsValidField(): boolean {
+    return this.formHelper.validateCpf(this.customer.cpf);
+  }
+
   passwordsMatch(): boolean {
-    return this.customer.password === this.confirmPassword && this.customer.password !== '';
+    return this.formHelper.validatePasswordMatch(this.customer.password, this.confirmPassword).valid;
   }
 
   onSubmit(form: any) {
@@ -75,13 +97,15 @@ export class RegisterCustomer {
       return false;
     }
 
-    if (!this.passwordsMatch()) {
-      this.errorMessage = 'As senhas não coincidem';
+    const passwordValidation = this.formHelper.validatePassword(this.customer.password);
+    if (!passwordValidation.valid) {
+      this.errorMessage = passwordValidation.message!;
       return false;
     }
 
-    if (this.customer.password.length < 6) {
-      this.errorMessage = 'A senha deve ter pelo menos 6 caracteres';
+    const passwordMatchValidation = this.formHelper.validatePasswordMatch(this.customer.password, this.confirmPassword);
+    if (!passwordMatchValidation.valid) {
+      this.errorMessage = passwordMatchValidation.message!;
       return false;
     }
 
@@ -90,13 +114,5 @@ export class RegisterCustomer {
 
   goBackToLogin() {
     this.router.navigate(['']);
-  }
-
-  onPhoneInput() {
-    this.customer.telephone = maskPhone(this.customer.telephone);
-  }
-
-  cpfIsValidField(): boolean {
-    return cpfIsValid(this.customer.cpf);
   }
 }

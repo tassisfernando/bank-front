@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { cpfIsValid } from '../../../shared/utils/validators';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +7,7 @@ import { TokenService } from '../../../core/services/token.service';
 import { AuthResponse } from '../../../shared/models/authResponse.model';
 import { Auth } from '../../../shared/models/auth.model';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
+import { FormHelperService } from '../../../shared/services/form-helper.service';
 
 @Component({
   selector: 'app-login',
@@ -27,8 +27,24 @@ export class Login {
     private router: Router, 
     private authService: AuthService,
     private tokenService: TokenService,
-    private errorHandler: ErrorHandlerService
+    private errorHandler: ErrorHandlerService,
+    private formHelper: FormHelperService
   ) {}
+
+  // Métodos delegados para o FormHelperService
+  onCpfInput(event: any) {
+    this.formHelper.onCpfInput(event, (value) => {
+      this.customer.cpf = value;
+    });
+  }
+
+  onKeyPress(event: KeyboardEvent): boolean {
+    return this.formHelper.onKeyPress(event);
+  }
+
+  cpfIsValidField(): boolean {
+    return this.formHelper.validateCpf(this.customer.cpf);
+  }
 
   createAccount() {
     this.router.navigate(['/register']);
@@ -41,7 +57,7 @@ export class Login {
       return;
     }
 
-    this.isLoading = true; // Ativa o loading
+    this.isLoading = true;
 
     const loginData: Auth = {
       cpf: this.customer.cpf,
@@ -77,9 +93,5 @@ export class Login {
     }
 
     return true;
-  }
-
-  cpfIsValidField(): boolean {
-    return cpfIsValid(this.customer.cpf);
   }
 }
