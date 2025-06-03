@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TokenService } from '../../../../core/services/token.service';
 import { AuthService } from '../../../login/services/auth.service';
+import { HeaderComponent } from '../../../../shared/components/header/header';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HeaderComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
@@ -25,23 +26,19 @@ export class DashboardComponent implements OnInit {
   }
 
   createAccount() {
-    // Navegar para criação de conta bancária
-    console.log('Criar conta bancária');
+    this.router.navigate(['/accounts']);
   }
 
   withdraw() {
-    // Navegar para saque
-    console.log('Sacar');
+    this.router.navigate(['/withdraw']);  
   }
 
   deposit() {
-    // Navegar para depósito
-    console.log('Depositar');
+    this.router.navigate(['/deposit']);
   }
 
   viewStatement() {
-    // Navegar para extrato
-    console.log('Ver extrato');
+    this.router.navigate(['/statement']);
   }
 
   logout() {

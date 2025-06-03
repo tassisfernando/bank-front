@@ -1,0 +1,104 @@
+<div class="statement-container">
+  <app-header></app-header>
+  
+  <main class="statement-main">
+    <div class="statement-content">
+      <h2>Extrato Bancário</h2>
+      
+      <!-- Loading das contas -->
+      <div *ngIf="isLoadingAccounts" class="loading-container">
+        <p>Carregando contas...</p>
+      </div>
+      
+      <!-- Erro ao carregar contas -->
+      <div *ngIf="errorMessage && !isLoadingAccounts && accounts.length === 0" class="error-message">
+        {{ errorMessage }}
+        <button class="retry-btn" (click)="retryLoadAccounts()">
+          Tentar Novamente
+        </button>
+      </div>
+      
+      <!-- Filtro de contas (só aparece quando contas carregaram) -->
+      <div *ngIf="!isLoadingAccounts && accounts.length > 0" class="filter-section">
+        <div class="form-group">
+          <label for="account">Selecione a Conta</label>
+          <select 
+            id="account" 
+            name="account" 
+            [(ngModel)]="selectedAccount"
+            class="form-select"
+            [disabled]="isLoading">
+            <option value="">Selecione uma conta</option>
+            <option *ngFor="let acc of accounts" [value]="acc.accountNumber">
+              {{ acc.accountNumber }} - Saldo: {{ acc.balance | currency:'BRL':'symbol':'1.2-2' }}
+            </option>
+          </select>
+        </div>
+        
+        <button 
+          class="consult-btn"
+          (click)="loadStatement()"
+          [disabled]="!selectedAccount || isLoading">
+          {{ isLoading ? 'Carregando...' : 'Consultar' }}
+        </button>
+      </div>
+
+      <!-- Erro na consulta do extrato -->
+      <div *ngIf="errorMessage && accounts.length > 0 && !isLoadingAccounts" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Loading do extrato -->
+      <div *ngIf="isLoading" class="loading-container">
+        <p>Carregando extrato...</p>
+      </div>
+
+      <!-- Resultado do extrato -->
+      <div *ngIf="statements.length > 0 && !isLoading" class="statement-section">
+        <div class="account-info">
+          <h3>Conta: {{ selectedAccount }}</h3>
+          <p class="balance">Saldo Atual: {{ currentBalance | currency:'BRL':'symbol':'1.2-2' }}</p>
+        </div>
+
+        <div class="transactions-table-container">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Valor</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let statement of statements" 
+                  [class.credit]="statement.type === TransactionType.CREDIT"
+                  [class.debit]="statement.type === TransactionType.DEBIT">
+                <td>{{ statement.dateTime | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ statement.amount | currency:'BRL':'symbol':'1.2-2' }}</td>
+                <td>
+                  <span class="transaction-type" 
+                        [class.credit]="statement.type === TransactionType.CREDIT" 
+                        [class.debit]="statement.type === TransactionType.DEBIT">
+                    {{ getTypeDescription(statement.type) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Nenhuma transação encontrada -->
+      <div *ngIf="!isLoading && selectedAccount && statements.length === 0 && hasSearched" class="no-transactions">
+        <p>Nenhuma transação encontrada para esta conta.</p>
+      </div>
+
+      <!-- Nenhuma conta encontrada -->
+      <div *ngIf="!isLoadingAccounts && accounts.length === 0 && !errorMessage" class="no-accounts-container">
+        <p>Nenhuma conta encontrada para consultar extrato.</p>
+      </div>
+      
+      <app-back-button text="Voltar ao Menu" route="/dashboard"></app-back-button>
+    </div>
+  </main>
+</div>

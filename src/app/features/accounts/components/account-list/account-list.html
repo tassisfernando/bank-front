@@ -1,0 +1,53 @@
+<div class="accounts-container">
+  <app-header></app-header>
+  
+  <main class="accounts-main">
+    <div class="accounts-content">
+      <h2>Minhas Contas</h2>
+      
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="loading-container">
+        <p>Carregando contas...</p>
+      </div>
+      
+      <!-- Error message -->
+      <div *ngIf="errorMessage && !isLoading" class="error-message">
+        {{ errorMessage }}
+        <button class="retry-btn" (click)="retryLoadAccounts()">
+          Tentar Novamente
+        </button>
+      </div>
+      
+      <!-- Content when loaded successfully -->
+      <div *ngIf="!isLoading && !errorMessage">
+        <div *ngIf="accounts.length > 0" class="accounts-table-container">
+          <table class="accounts-table">
+            <thead>
+              <tr>
+                <th>Número da Conta</th>
+                <th>Saldo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let account of accounts">
+                <td>{{ account.accountNumber }}</td>
+                <td>{{ account.balance | currency:'BRL':'symbol':'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Mensagem quando não há contas (só depois do loading) -->
+        <div *ngIf="accounts.length === 0" class="no-accounts-container">
+          <p class="no-accounts">Nenhuma conta encontrada</p>
+        </div>
+        
+        <button class="create-account-btn" (click)="createNewAccount()">
+          Criar Nova Conta
+        </button>
+      </div>
+    </div>
+
+    <app-back-button text="Voltar" route="/dashboard"></app-back-button>
+  </main>
+</div>

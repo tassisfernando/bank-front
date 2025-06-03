@@ -1,23 +1,50 @@
 <div class="login-container">
   <div class="logo-placeholder">
-    <!-- Espaço reservado para a logo -->
-    <span>Logo aqui</span>
+    <span class="logo-emoji">🏦</span>
   </div>
   <h2>Bem-vindo ao Digital</h2>
+  
   <form (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="cpf">CPF</label>
-      <input id="cpf" type="text" name="cpf" maxlength="14" [(ngModel)]="customer.cpf" required>
+      <input 
+        id="cpf" 
+        type="text" 
+        name="cpf" 
+        maxlength="14" 
+        [(ngModel)]="customer.cpf" 
+        required
+        [disabled]="isLoading">
       <div *ngIf="customer.cpf && !cpfIsValidField()" class="error">CPF inválido</div>
     </div>
+    
     <div class="form-group">
       <label for="password">Senha</label>
-      <input id="password" type="password" name="password" [(ngModel)]="customer.password" required>
+      <input 
+        id="password" 
+        type="password" 
+        name="password" 
+        [(ngModel)]="customer.password" 
+        required
+        [disabled]="isLoading">
     </div>
-    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-    <button type="submit" class="login-btn">Entrar</button>
+    
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    
+    <button 
+      type="submit" 
+      class="login-btn"
+      [disabled]="isLoading">
+      <span *ngIf="isLoading">Entrando...</span>
+      <span *ngIf="!isLoading">Entrar</span>
+    </button>
   </form>
-  <button class="create-account-btn" type="button" (click)="createAccount()">
+  
+  <button 
+    class="create-account-btn" 
+    type="button" 
+    (click)="createAccount()"
+    [disabled]="isLoading">
     Criar nova conta
   </button>
 </div>

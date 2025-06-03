@@ -1,0 +1,35 @@
+/* filepath: src/app/shared/components/header/header.component.scss */
+.dashboard-header {
+  background: #fff;
+  padding: 16px 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-section .logo-placeholder {
+  width: 60px;
+  height: 60px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e9ecef;
+}
+
+.logo-emoji {
+  font-size: 2em;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+}
+
+.welcome-text {
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #333;
+}

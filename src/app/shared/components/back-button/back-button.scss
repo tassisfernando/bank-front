@@ -1,0 +1,19 @@
+/* filepath: src/app/shared/components/back-button/back-button.component.scss */
+.back-btn {
+  display: block;
+  width: 200px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  background: #f5f5f5;
+  color: #1976d2;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #eeeeee;
+}

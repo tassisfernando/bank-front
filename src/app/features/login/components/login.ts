@@ -5,6 +5,9 @@ import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TokenService } from '../../../core/services/token.service';
+import { AuthResponse } from '../../../shared/models/authResponse.model';
+import { Auth } from '../../../shared/models/auth.model';
+import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 
 @Component({
   selector: 'app-login',
@@ -13,16 +16,18 @@ import { TokenService } from '../../../core/services/token.service';
   styleUrl: './login.scss'
 })
 export class Login {
-  customer = {
+  customer: Auth = {
     cpf: '',
     password: ''
   };
   errorMessage = '';
+  isLoading = false;
 
   constructor(
     private router: Router, 
     private authService: AuthService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private errorHandler: ErrorHandlerService
   ) {}
 
   createAccount() {
@@ -31,27 +36,47 @@ export class Login {
 
   onSubmit() {
     this.errorMessage = '';
-    if (!this.cpfIsValidField()) {
-      this.errorMessage = 'CPF inválido';
-      return;
-    }
-    if (!this.customer.password) {
-      this.errorMessage = 'Senha obrigatória';
+    
+    if (!this.validateForm()) {
       return;
     }
 
-    this.authService.login(this.customer.cpf, this.customer.password).subscribe({
-      next: (response) => {
-        // Salva o token na sessão
+    this.isLoading = true; // Ativa o loading
+
+    const loginData: Auth = {
+      cpf: this.customer.cpf,
+      password: this.customer.password
+    };
+
+    this.authService.login(loginData).subscribe({
+      next: (response: AuthResponse) => {
         this.tokenService.saveToken(response.token);
         this.tokenService.saveUserName(response.name);
-        // Redireciona para o dashboard
+        this.tokenService.saveUserId(response.user_id);
+        
+        this.isLoading = false; 
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.errorMessage = 'CPF ou senha incorretos';
+        console.error('Login error:', err);
+        this.errorMessage = this.errorHandler.handleAuthError(err);
+        this.isLoading = false;
       }
     });
+  }
+
+  validateForm(): boolean {
+    if (!this.cpfIsValidField()) {
+      this.errorMessage = 'CPF inválido';
+      return false;
+    }
+    
+    if (!this.customer.password) {
+      this.errorMessage = 'Senha obrigatória';
+      return false;
+    }
+
+    return true;
   }
 
   cpfIsValidField(): boolean {

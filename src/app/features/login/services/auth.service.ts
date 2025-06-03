@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { TokenService } from '../../../core/services/token.service';
 import { Router } from '@angular/router';
+import { AuthResponse } from '../../../shared/models/authResponse.model';
+import { Auth } from '../../../shared/models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -15,8 +17,8 @@ export class AuthService {
     private router: Router
   ) {}
   
-  login(cpf: string, password: string): Observable<any> {
-    return this.http.post(this.apiUrl, { cpf, password });
+  login(auth: Auth): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(this.apiUrl, auth);
   }
 
   logout(): void {
