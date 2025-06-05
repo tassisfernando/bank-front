@@ -7,7 +7,7 @@ import { WithdrawComponent } from './features/transactions/components/withdraw/w
 import { guestGuard } from './core/guards/guest.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { DepositComponent } from './features/transactions/components/deposit/deposit';
-import { StatementComponent } from './features/transactions/components/components/statement/statement';
+import { StatementComponent } from './features/transactions/components/statement/statement';
 
 export const routes: Routes = [
     {
