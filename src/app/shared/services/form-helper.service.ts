@@ -5,30 +5,24 @@ export class FormHelperService {
 
   constructor() {}
 
-  // Método para permitir apenas números no CPF
   onCpfInput(event: any, callback: (value: string) => void) {
     let value = event.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
     
-    // Limita a 11 dígitos
     if (value.length > 11) {
       value = value.substring(0, 11);
     }
     
-    // Aplica máscara do CPF
     const maskedValue = this.maskCpf(value);
     callback(maskedValue);
   }
 
-  // Método para permitir apenas números no telefone
   onPhoneInput(event: any, callback: (value: string) => void) {
     let value = event.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
     
-    // Limita a 11 dígitos (celular com DDD)
     if (value.length > 11) {
       value = value.substring(0, 11);
     }
     
-    // Aplica máscara do telefone
     const maskedValue = this.maskPhone(value);
     callback(maskedValue);
   }
@@ -45,7 +39,6 @@ export class FormHelperService {
     return true;
   }
 
-  // Máscara de CPF
   private maskCpf(value: string): string {
     value = value.replace(/\D/g, '');
     
@@ -58,7 +51,6 @@ export class FormHelperService {
     return value;
   }
 
-  // Máscara de telefone
   private maskPhone(value: string): string {
     value = value.replace(/\D/g, '');
     
@@ -110,7 +102,6 @@ export class FormHelperService {
     return true;
   }
 
-  // Validação de senha
   validatePassword(password: string, minLength: number = 6): { valid: boolean, message?: string } {
     if (!password) {
       return { valid: false, message: 'Senha é obrigatória' };
@@ -123,12 +114,15 @@ export class FormHelperService {
     return { valid: true };
   }
 
-  // Validação de confirmação de senha
   validatePasswordMatch(password: string, confirmPassword: string): { valid: boolean, message?: string } {
     if (password !== confirmPassword) {
       return { valid: false, message: 'As senhas não coincidem' };
     }
     
     return { valid: true };
+  }
+
+  cleanNumericField(value: string): string {
+    return value.replace(/\D/g, '');
   }
 }

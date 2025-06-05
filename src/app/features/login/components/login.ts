@@ -60,7 +60,7 @@ export class Login {
     this.isLoading = true;
 
     const loginData: Auth = {
-      cpf: this.customer.cpf,
+      cpf: this.formHelper.cleanNumericField(this.customer.cpf),
       password: this.customer.password
     };
 

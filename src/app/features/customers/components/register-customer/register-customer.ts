@@ -68,7 +68,13 @@ export class RegisterCustomer {
 
     this.isLoading = true;
 
-    this.customerService.registerCustomer(this.customer).subscribe({
+    const cleanCustomer: Customer = {
+      ...this.customer,
+      cpf: this.formHelper.cleanNumericField(this.customer.cpf),
+      telephone: this.formHelper.cleanNumericField(this.customer.telephone)
+    };
+
+    this.customerService.registerCustomer(cleanCustomer).subscribe({
       next: (response) => {
         console.log('Customer registered successfully:', response);
         this.successMessage = 'Conta criada com sucesso!';
