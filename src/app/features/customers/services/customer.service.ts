@@ -3,11 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Customer } from '../../../shared/models/customer.model';
-
-export interface CustomerRegistrationResponse {
-  message: string;
-  customerId?: string;
-}
+import { CustomerResponse } from '../../../shared/models/customerResponse.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -15,15 +11,15 @@ export class CustomerService {
 
   constructor(private http: HttpClient) {}
 
-  registerCustomer(customer: Customer): Observable<CustomerRegistrationResponse> {
-    return this.http.post<CustomerRegistrationResponse>(`${this.apiUrl}`, customer);
+  registerCustomer(customer: Customer): Observable<CustomerResponse> {
+    return this.http.post<CustomerResponse>(`${this.apiUrl}`, customer);
   }
 
-  getCustomerById(id: string): Observable<Customer> {
-    return this.http.get<Customer>(`${this.apiUrl}/${id}`);
+  getCustomerById(id: string): Observable<CustomerResponse> {
+    return this.http.get<CustomerResponse>(`${this.apiUrl}/${id}`);
   }
 
-  updateCustomer(id: string, customer: Partial<Customer>): Observable<Customer> {
-    return this.http.put<Customer>(`${this.apiUrl}/${id}`, customer);
+  updateCustomer(id: string, customer: Partial<Customer>): Observable<CustomerResponse> {
+    return this.http.put<CustomerResponse>(`${this.apiUrl}/${id}`, customer);
   }
 }

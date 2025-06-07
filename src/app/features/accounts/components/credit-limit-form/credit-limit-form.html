@@ -1,0 +1,73 @@
+<div class="credit-limit-form-container">
+  <h3>Alterar Limite de Crédito</h3>
+  
+  <form #creditLimitForm="ngForm" (ngSubmit)="onSubmit(creditLimitForm)">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="accountSelect">Conta</label>
+        <select 
+          id="accountSelect"
+          name="selectedAccount" 
+          [(ngModel)]="selectedAccount"
+          required
+          [disabled]="isLoading || accounts.length === 0"
+          class="form-select">
+          <option value="">Selecione uma conta</option>
+          <option *ngFor="let account of accounts" [value]="account.accountNumber">
+            {{ account.accountNumber }} - Saldo: {{ account.balance | currency:'BRL':'symbol':'1.2-2' }}
+          </option>
+        </select>
+        
+        <!-- Informação da conta selecionada -->
+        <div *ngIf="selectedAccount" class="account-info">
+          <small><strong>Limite atual:</strong> {{ getCurrentCreditLimit() }}</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="creditLimit">Novo Limite de Crédito</label>
+        <input 
+          id="creditLimit"
+          type="number" 
+          name="newCreditLimit"
+          [(ngModel)]="newCreditLimit"
+          placeholder="0,00"
+          [min]="getMinimumAllowedLimit()"
+          max="50000"
+          step="0.01"
+          required
+          [disabled]="isLoading"
+          [class.valid-limit]="isValidNewLimit()"
+          class="form-input">
+        
+        <!-- Dica visual sobre o limite mínimo -->
+        <div *ngIf="selectedAccount" class="input-hint">
+          <small>Valor deve ser maior que {{ getCurrentCreditLimit() }}</small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="confirm-btn"
+          [disabled]="creditLimitForm.invalid || isLoading || accounts.length === 0 || !isValidNewLimit()">
+          {{ isLoading ? 'Alterando...' : 'Confirmar Alteração' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Mensagens de feedback -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+
+  <!-- Mensagem quando não há contas -->
+  <div *ngIf="accounts.length === 0" class="no-accounts-message">
+    <small>Nenhuma conta disponível para alteração de limite</small>
+  </div>
+</div>

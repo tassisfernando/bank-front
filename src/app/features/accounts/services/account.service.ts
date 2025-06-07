@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Account } from '../../../shared/models/account.model';
 import { AccountRequest } from '../../../shared/models/accountRequest.model';
+import { CreditLimitRequest } from '../../../shared/models/creditLimitRequest.model';
+import { CreditLimitResponse } from '../../../shared/models/creditLimitResponse.model';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -17,6 +19,11 @@ export class AccountService {
 
   getAccounts(customerId: string): Observable<Account[]> {
     return this.http.get<Account[]>(`${this.apiUrl}/accounts/${customerId}`);
+  }
+
+  updateCreditLimit(creditLimitData: CreditLimitRequest): Observable<CreditLimitResponse> {
+    const accountNumber = creditLimitData.accountNumber;
+    return this.http.patch<CreditLimitResponse>(`${this.apiUrl}/accounts/${accountNumber}/credit-limit`, creditLimitData);
   }
 
 }

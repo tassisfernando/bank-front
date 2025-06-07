@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../../../shared/components/header/header';
 import { BackButton } from '../../../../shared/components/back-button/back-button';
 import { Account } from '../../../../shared/models/account.model';
-import { getTransactionTypeDescription, TransactionType } from '../../../../shared/enums/transactionType.enum';
+import { getTransactionTypeDescription, translateTransactionType, TransactionType } from '../../../../shared/enums/transactionType.enum';
+import { getOperationTypeClass, translateOperation } from '../../../../shared/enums/operationType.enum';
 import { TransactionService } from '../../services/transaction.service';
 import { AccountService } from '../../../accounts/services/account.service';
 import { TokenService } from '../../../../core/services/token.service';
@@ -85,7 +86,6 @@ export class StatementComponent implements OnInit {
           new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
         );
         
-        // Busca o saldo atual da conta selecionada
         const selectedAccountData = this.accounts.find(acc => acc.accountNumber === this.selectedAccount);
         this.currentBalance = selectedAccountData?.balance || 0;
         
@@ -101,8 +101,53 @@ export class StatementComponent implements OnInit {
     });
   }
 
-  getTypeDescription(type: TransactionType): string {
-    return getTransactionTypeDescription(type);
+  getTransactionTypeForAccount(statement: StatementResponse): 'credit' | 'debit' {
+    const isOriginAccount = statement.accountNumberOrigin === this.selectedAccount;
+    const isDestinationAccount = statement.accountNumberDestin === this.selectedAccount;
+    
+    if (isDestinationAccount && !isOriginAccount) {
+      return 'credit';
+    }
+    
+    if (isOriginAccount && !isDestinationAccount) {
+      return 'debit';
+    }
+    
+    if (isOriginAccount && isDestinationAccount) {
+      const operation = translateOperation(statement.operation).toLowerCase();
+      
+      if (['depósito', 'bônus'].includes(operation)) {
+        return 'credit';
+      }
+      
+      if (['saque', 'taxa'].includes(operation)) {
+        return 'debit';
+      }
+    }
+    
+    if (typeof statement.type === 'string') {
+      const normalizedType = statement.type.trim().toUpperCase();
+      return ['CREDIT', 'CREDITO', 'C'].includes(normalizedType) ? 'credit' : 'debit';
+    }
+    
+    return statement.type === TransactionType.CREDIT ? 'credit' : 'debit';
+  }
+
+  getTypeDescription(statement: StatementResponse): string {
+    const accountType = this.getTransactionTypeForAccount(statement);
+    return accountType === 'credit' ? 'Crédito' : 'Débito';
+  }
+
+  isCreditTransaction(statement: StatementResponse): boolean {
+    return this.getTransactionTypeForAccount(statement) === 'credit';
+  }
+
+  getOperationClass(operation: string): string {
+    return getOperationTypeClass(operation);
+  }
+
+  getOperationText(operation: string): string {
+    return translateOperation(operation);
   }
 
   retryLoadAccounts() {

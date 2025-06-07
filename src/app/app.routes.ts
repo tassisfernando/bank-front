@@ -8,6 +8,7 @@ import { guestGuard } from './core/guards/guest.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { DepositComponent } from './features/transactions/components/deposit/deposit';
 import { StatementComponent } from './features/transactions/components/statement/statement';
+import { TransferComponent } from './features/transactions/components/transfer/transfer';
 
 export const routes: Routes = [
     {
@@ -43,6 +44,11 @@ export const routes: Routes = [
     {
         path: 'statement', 
         component: StatementComponent,
+        canActivate: [authGuard]
+    },
+    {
+        path: 'transfer',
+        component: TransferComponent,
         canActivate: [authGuard]
     },
 ];

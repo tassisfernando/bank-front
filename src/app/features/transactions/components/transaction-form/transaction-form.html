@@ -5,88 +5,79 @@
     <div class="transaction-content">
       <h2>{{ title }}</h2>
       
-      <!-- Loading das contas -->
-      <div *ngIf="isLoadingAccounts" class="loading-container">
-        <p>Carregando contas...</p>
-      </div>
-      
-      <!-- Erro ao carregar contas -->
-      <div *ngIf="errorMessage && !isLoadingAccounts && accounts.length === 0" class="error-message">
-        {{ errorMessage }}
-        <button class="retry-btn" (click)="retryLoadAccounts()">
-          Tentar Novamente
+      <form #transactionForm="ngForm" (ngSubmit)="onSubmit(transactionForm)">
+        <div class="form-group">
+          <label for="accountSelect">Selecionar Conta</label>
+          <select 
+            id="accountSelect"
+            name="selectedAccount" 
+            [(ngModel)]="selectedAccount"
+            required
+            [disabled]="isLoading || isLoadingAccounts"
+            class="form-select">
+            <option value="">Selecione uma conta</option>
+            <option *ngFor="let account of accounts" [value]="account.accountNumber">
+              {{ account.accountNumber }} - Saldo: {{ account.balance | currency:'BRL':'symbol':'1.2-2' }}
+              <span *ngIf="account.creditLimit && account.creditLimit > 0">
+                (Disponível: {{ getAvailableBalance(account) | currency:'BRL':'symbol':'1.2-2' }})
+              </span>
+            </option>
+          </select>
+          
+          <!-- Informações da conta selecionada -->
+          <div *ngIf="selectedAccount" class="account-details">
+            <div class="account-info">
+              <small><strong>Saldo atual:</strong> {{ getSelectedAccountInfo()?.balance | currency:'BRL':'symbol':'1.2-2' }}</small>
+            </div>
+            <div *ngIf="getSelectedAccountInfo()?.creditLimit && getSelectedAccountInfo()!.creditLimit! > 0" class="account-info">
+              <small><strong>Limite de crédito:</strong> {{ getSelectedAccountInfo()?.creditLimit | currency:'BRL':'symbol':'1.2-2' }}</small>
+            </div>
+            <div class="account-info total-available">
+              <small><strong>Total disponível:</strong> {{ getAvailableBalanceForSelectedAccount() | currency:'BRL':'symbol':'1.2-2' }}</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Valor</label>
+          <input 
+            id="amount"
+            type="number" 
+            name="amount"
+            [(ngModel)]="amount"
+            placeholder="0,00"
+            min="0.01"
+            [max]="transactionType === 'withdraw' ? getAvailableBalanceForSelectedAccount() : 10000"
+            step="0.01"
+            required
+            [disabled]="isLoading"
+            [class.valid-amount]="amount && amount > 0 && (transactionType === 'deposit' || amount <= getAvailableBalanceForSelectedAccount())"
+            class="form-input">
+          
+          <!-- Dica sobre limite disponível para saque -->
+          <div *ngIf="selectedAccount && transactionType === 'withdraw'" class="input-hint">
+            <small>Máximo disponível: {{ getAvailableBalanceForSelectedAccount() | currency:'BRL':'symbol':'1.2-2' }}</small>
+          </div>
+        </div>
+
+        <!-- Mensagens de erro e sucesso -->
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+        
+        <div *ngIf="successMessage" class="success-message">
+          {{ successMessage }}
+        </div>
+
+        <button 
+          type="submit" 
+          class="confirm-btn"
+          [disabled]="transactionForm.invalid || isLoading || !validateTransaction()">
+          {{ isLoading ? 'Processando...' : confirmButtonText }}
         </button>
-      </div>
-      
-      <!-- Formulário (só aparece quando contas carregaram) -->
-      <div *ngIf="!isLoadingAccounts && accounts.length > 0">
-        <form #transactionForm="ngForm" (ngSubmit)="onSubmit(transactionForm)" class="transaction-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="account">Conta</label>
-              <select 
-                id="account" 
-                name="account" 
-                [(ngModel)]="selectedAccount"
-                required 
-                #account="ngModel"
-                class="form-select"
-                [disabled]="isLoading">
-                <option value="">Selecione uma conta</option>
-                <option *ngFor="let acc of accounts" [value]="acc.accountNumber">
-                  {{ acc.accountNumber }} - Saldo: {{ acc.balance | currency:'BRL':'symbol':'1.2-2' }}
-                </option>
-              </select>
-              <div *ngIf="account.invalid && account.touched" class="error">
-                Selecione uma conta
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="amount">Valor</label>
-              <input 
-                id="amount" 
-                type="number" 
-                name="amount" 
-                [(ngModel)]="amount"
-                placeholder="0.00" 
-                required 
-                min="0.01"
-                step="0.01"
-                #amountField="ngModel"
-                class="form-input"
-                [disabled]="isLoading">
-              <div *ngIf="amountField.invalid && amountField.touched" class="error">
-                <div *ngIf="amountField.errors?.['required']">Valor é obrigatório</div>
-                <div *ngIf="amountField.errors?.['min']">Valor deve ser maior que zero</div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Mensagens de erro da transação -->
-          <div *ngIf="errorMessage && accounts.length > 0" class="error-message">
-            {{ errorMessage }}
-          </div>
-          
-          <div *ngIf="successMessage" class="success-message">
-            {{ successMessage }}
-          </div>
-          
-          <button 
-            type="submit" 
-            class="confirm-btn"
-            [disabled]="transactionForm.invalid || isLoading">
-            {{ isLoading ? 'Processando...' : confirmButtonText }}
-          </button>
-        </form>
-      </div>
-      
-      <!-- Nenhuma conta encontrada -->
-      <div *ngIf="!isLoadingAccounts && accounts.length === 0 && !errorMessage" class="no-accounts-container">
-        <p>Nenhuma conta encontrada para realizar transações.</p>
-      </div>
-      
-      <app-back-button [text]="backButtonText" route="/dashboard"></app-back-button>
+      </form>
     </div>
+
+    <app-back-button [text]="backButtonText" route="/dashboard"></app-back-button>
   </main>
 </div>

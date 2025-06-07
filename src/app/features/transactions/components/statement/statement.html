@@ -18,7 +18,7 @@
         </button>
       </div>
       
-      <!-- Filtro de contas (só aparece quando contas carregaram) -->
+      <!-- Filtro de contas -->
       <div *ngIf="!isLoadingAccounts && accounts.length > 0" class="filter-section">
         <div class="form-group">
           <label for="account">Selecione a Conta</label>
@@ -67,19 +67,30 @@
                 <th>Data</th>
                 <th>Valor</th>
                 <th>Tipo</th>
+                <th>Operação</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let statement of statements" 
-                  [class.credit]="statement.type === TransactionType.CREDIT"
-                  [class.debit]="statement.type === TransactionType.DEBIT">
+                  [class.credit]="isCreditTransaction(statement)"
+                  [class.debit]="!isCreditTransaction(statement)">
                 <td>{{ statement.dateTime | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td>{{ statement.amount | currency:'BRL':'symbol':'1.2-2' }}</td>
+                <td>
+                  <span [class.amount-credit]="isCreditTransaction(statement)"
+                        [class.amount-debit]="!isCreditTransaction(statement)">
+                    {{ isCreditTransaction(statement) ? '+' : '-' }}{{ statement.amount | currency:'BRL':'symbol':'1.2-2' }}
+                  </span>
+                </td>
                 <td>
                   <span class="transaction-type" 
-                        [class.credit]="statement.type === TransactionType.CREDIT" 
-                        [class.debit]="statement.type === TransactionType.DEBIT">
-                    {{ getTypeDescription(statement.type) }}
+                        [class.credit]="isCreditTransaction(statement)" 
+                        [class.debit]="!isCreditTransaction(statement)">
+                    {{ getTypeDescription(statement) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="operation-badge" [class]="getOperationClass(statement.operation)">
+                    {{ getOperationText(statement.operation) }}
                   </span>
                 </td>
               </tr>

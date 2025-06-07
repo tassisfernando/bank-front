@@ -1,43 +1,41 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../../../../shared/components/header/header';
 import { BackButton } from '../../../../shared/components/back-button/back-button';
-import { TransactionData } from '../../../../shared/models/transactionData.model';
-import { Account } from '../../../../shared/models/account.model';
 import { AccountService } from '../../../accounts/services/account.service';
+import { TransactionService } from '../../services/transaction.service';
 import { TokenService } from '../../../../core/services/token.service';
 import { ErrorHandlerService } from '../../../../shared/services/error-handler.service';
-import { TransactionService } from '../../services/transaction.service';
+import { Account } from '../../../../shared/models/account.model';
+import { TransferRequest } from '../../../../shared/models/transferRequest.model';
 
 @Component({
-  selector: 'app-transaction-form',
+  selector: 'app-transfer',
   standalone: true,
   imports: [CommonModule, FormsModule, HeaderComponent, BackButton],
-  templateUrl: './transaction-form.html',
-  styleUrls: ['./transaction-form.scss']
+  templateUrl: './transfer.html',
+  styleUrls: ['./transfer.scss']
 })
-export class TransactionFormComponent implements OnInit {
-  @Input() title: string = 'Transação';
-  @Input() confirmButtonText: string = 'Confirmar';
-  @Input() backButtonText: string = 'Voltar ao Menu';
-  @Input() transactionType: 'withdraw' | 'deposit' = 'withdraw';
-
+export class TransferComponent implements OnInit {
   accounts: Account[] = [];
   selectedAccount: string = '';
+  destinationAccount: string = '';
   amount: number | null = null;
-  errorMessage: string = '';
-  successMessage: string = '';
+  
+  customerId: string = '';
   isLoading: boolean = false;
   isLoadingAccounts: boolean = false;
-  customerId: string = '';
+  errorMessage: string = '';
+  successMessage: string = '';
 
-  constructor(private router: Router, 
+  constructor(
+    private router: Router,
     private accountService: AccountService,
+    private transactionService: TransactionService,
     private tokenService: TokenService,
-    private errorHandler: ErrorHandlerService,
-    private transactionService: TransactionService
+    private errorHandler: ErrorHandlerService
   ) {}
 
   ngOnInit() {
@@ -46,27 +44,24 @@ export class TransactionFormComponent implements OnInit {
   }
 
   loadAccounts() {
-    this.isLoadingAccounts = true;
-    this.errorMessage = ''; 
-    
     if (!this.customerId) {
-      console.error('Customer ID not found in token service');
-      this.accounts = [];
       this.errorMessage = 'Erro: ID do cliente não encontrado';
-      this.isLoadingAccounts = false;
       return;
     }
+
+    this.isLoadingAccounts = true;
+    this.errorMessage = '';
 
     this.accountService.getAccounts(this.customerId).subscribe({
       next: (accounts) => {
         this.accounts = accounts;
-        this.isLoadingAccounts = false; 
-        console.log('Accounts loaded:', this.accounts);
+        this.isLoadingAccounts = false;
+        console.log('Accounts loaded for transfer:', this.accounts);
       },
       error: (error) => {
-        this.accounts = [];
         this.errorMessage = this.errorHandler.handleAccountError(error);
-        this.isLoadingAccounts = false; 
+        this.isLoadingAccounts = false;
+        console.error('Error loading accounts:', error);
       }
     });
   }
@@ -75,37 +70,28 @@ export class TransactionFormComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (form.valid && this.validateTransaction()) {
+    if (form.valid && this.validateTransfer()) {
       this.isLoading = true;
       
-      const transactionData: TransactionData = {
+      const transferData: TransferRequest = {
         accountNumberOrigin: this.selectedAccount,
+        accountNumberDestin: this.destinationAccount.trim(),
         amount: this.amount!
       };
 
-      const transaction$ = this.transactionType === 'deposit' 
-        ? this.transactionService.deposit(transactionData, this.customerId)
-        : this.transactionService.withdraw(transactionData, this.customerId);
-
-      transaction$.subscribe({
+      this.transactionService.transfer(transferData, this.customerId).subscribe({
         next: (response) => {
-          console.log('Transação realizada com sucesso:', response);
-          this.successMessage = response.message || `${this.transactionType === 'withdraw' ? 'Saque' : 'Depósito'} realizado com sucesso!`;
+          console.log('Transferência realizada com sucesso:', response);
+          this.successMessage = response.message || 'Transferência realizada com sucesso!';
           this.isLoading = false;
-          
-          if (response.newBalance !== undefined) {
-            this.updateAccountBalance(response.newBalance);
-          }
-          
           this.resetForm();
           
-          // Redireciona após sucesso
           setTimeout(() => {
             this.router.navigate(['/dashboard']);
           }, 2000);
         },
         error: (error) => {
-          console.error('Erro na transação:', error);
+          console.error('Erro na transferência:', error);
           this.errorMessage = this.errorHandler.handleTransactionError(error);
           this.isLoading = false;
         }
@@ -113,32 +99,25 @@ export class TransactionFormComponent implements OnInit {
     }
   }
 
-  updateAccountBalance(newBalance: number) {
-    const accountIndex = this.accounts.findIndex(acc => acc.accountNumber === this.selectedAccount);
-    if (accountIndex !== -1) {
-      this.accounts[accountIndex].balance = newBalance;
-    }
-  }
-
-  validateTransaction(): boolean {
-    if (!this.selectedAccount || !this.amount) {
+  validateTransfer(): boolean {
+    if (!this.selectedAccount || !this.destinationAccount || !this.amount) {
       return false;
     }
 
     const selectedAccountData = this.accounts.find(acc => acc.accountNumber === this.selectedAccount);
-    
     if (!selectedAccountData) {
-      this.errorMessage = 'Conta não encontrada';
+      this.errorMessage = 'Conta de origem não encontrada';
       return false;
     }
 
-    if (this.transactionType === 'withdraw') {
-      const availableBalance = this.getAvailableBalance(selectedAccountData);
-      
-      if (this.amount > availableBalance) {
-        this.errorMessage = `Valor indisponível. Disponível: ${this.formatCurrency(availableBalance)} (Saldo: ${this.formatCurrency(selectedAccountData.balance)} + Limite: ${this.formatCurrency(selectedAccountData.creditLimit || 0)})`;
-        return false;
-      }
+    if (this.destinationAccount.trim().length < 5) {
+      this.errorMessage = 'Conta de destino deve ter pelo menos 5 caracteres';
+      return false;
+    }
+
+    if (this.selectedAccount === this.destinationAccount.trim()) {
+      this.errorMessage = 'Não é possível transferir para a mesma conta';
+      return false;
     }
 
     if (this.amount <= 0) {
@@ -146,12 +125,25 @@ export class TransactionFormComponent implements OnInit {
       return false;
     }
 
-    if (this.amount > 10000) {
-      this.errorMessage = 'Valor máximo por transação: R$ 10.000,00';
+    if (this.amount > 50000) {
+      this.errorMessage = 'Valor máximo por transferência: R$ 50.000,00';
+      return false;
+    }
+
+    const availableBalance = this.getAvailableBalance(selectedAccountData);
+    if (this.amount > availableBalance) {
+      this.errorMessage = `Valor indisponível. Disponível: ${this.formatCurrency(availableBalance)}`;
       return false;
     }
 
     return true;
+  }
+
+  isSameAccount(): boolean {
+    if (!this.selectedAccount || !this.destinationAccount) {
+      return false;
+    }
+    return this.selectedAccount === this.destinationAccount.trim();
   }
 
   getAvailableBalance(account: Account): number {
@@ -176,10 +168,12 @@ export class TransactionFormComponent implements OnInit {
 
   resetForm() {
     this.selectedAccount = '';
+    this.destinationAccount = '';
     this.amount = null;
   }
 
   retryLoadAccounts() {
     this.loadAccounts();
   }
+
 }

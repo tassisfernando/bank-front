@@ -1,0 +1,136 @@
+<div class="transfer-container">
+  <app-header></app-header>
+  
+  <main class="transfer-main">
+    <div class="transfer-content">
+      <h2>Transferência</h2>
+      
+      <!-- Loading accounts -->
+      <div *ngIf="isLoadingAccounts" class="loading-container">
+        <p>Carregando contas...</p>
+      </div>
+      
+      <!-- Error loading accounts -->
+      <div *ngIf="errorMessage && isLoadingAccounts" class="error-container">
+        <p class="error-text">{{ errorMessage }}</p>
+        <button class="retry-btn" (click)="retryLoadAccounts()">
+          Tentar Novamente
+        </button>
+      </div>
+      
+      <!-- Transfer form -->
+      <div *ngIf="!isLoadingAccounts" class="transfer-form">
+        <form #transferForm="ngForm" (ngSubmit)="onSubmit(transferForm)">
+          
+          <!-- Conta de origem -->
+          <div class="form-group">
+            <label for="originAccount">Conta de Origem</label>
+            <select 
+              id="originAccount"
+              name="selectedAccount" 
+              [(ngModel)]="selectedAccount"
+              required
+              [disabled]="isLoading || accounts.length === 0"
+              class="form-select">
+              <option value="">Selecione sua conta</option>
+              <option *ngFor="let account of accounts" [value]="account.accountNumber">
+                {{ account.accountNumber }} - Saldo: {{ account.balance | currency:'BRL':'symbol':'1.2-2' }}
+                <span *ngIf="account.creditLimit && account.creditLimit > 0">
+                  (Disponível: {{ getAvailableBalance(account) | currency:'BRL':'symbol':'1.2-2' }})
+                </span>
+              </option>
+            </select>
+            
+            <!-- Informações da conta selecionada -->
+            <div *ngIf="selectedAccount" class="account-details">
+              <div class="account-info">
+                <small><strong>Saldo atual:</strong> {{ getSelectedAccountInfo()?.balance | currency:'BRL':'symbol':'1.2-2' }}</small>
+              </div>
+              <div *ngIf="getSelectedAccountInfo()?.creditLimit && getSelectedAccountInfo()!.creditLimit! > 0" class="account-info">
+                <small><strong>Limite de crédito:</strong> {{ getSelectedAccountInfo()?.creditLimit | currency:'BRL':'symbol':'1.2-2' }}</small>
+              </div>
+              <div class="account-info total-available">
+                <small><strong>Total disponível:</strong> {{ getAvailableBalanceForSelectedAccount() | currency:'BRL':'symbol':'1.2-2' }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conta de destino -->
+          <div class="form-group">
+            <label for="destinationAccount">Conta de Destino</label>
+            <input 
+              id="destinationAccount"
+              type="text" 
+              name="destinationAccount"
+              [(ngModel)]="destinationAccount"
+              placeholder="Digite o número da conta"
+              maxlength="12"
+              required
+              [disabled]="isLoading"
+              [class.invalid-same-account]="isSameAccount()"
+              class="form-input">
+            
+            <div *ngIf="isSameAccount()" class="same-account-warning">
+              <small>⚠️ Esta é a mesma conta de origem. Selecione uma conta diferente.</small>
+            </div>
+
+            <div class="input-hint">
+              <small>Ex: AA-123456</small>
+            </div>
+          </div>
+
+          <!-- Valor da transferência -->
+          <div class="form-group amount-group">
+            <label for="amount">Valor a Transferir</label>
+            <input 
+              id="amount"
+              type="number" 
+              name="amount"
+              [(ngModel)]="amount"
+              placeholder="0,00"
+              min="0.01"
+              max="50000"
+              step="0.01"
+              required
+              [disabled]="isLoading"
+              class="form-input">
+            
+            <!-- Dica sobre limite disponível -->
+            <div *ngIf="selectedAccount" class="input-hint">
+              <small>Máximo disponível: {{ getAvailableBalanceForSelectedAccount() | currency:'BRL':'symbol':'1.2-2' }}</small>
+            </div>
+          </div>
+
+          <!-- Container para mensagens -->
+          <div class="messages-container">
+            <div *ngIf="errorMessage && !isLoadingAccounts" class="error-message">
+              {{ errorMessage }}
+            </div>
+            
+            <div *ngIf="successMessage" class="success-message">
+              {{ successMessage }}
+            </div>
+          </div>
+
+          <!-- Botão de confirmar -->
+          <div class="button-container">
+            <button 
+              type="submit" 
+              class="confirm-btn"
+              [disabled]="transferForm.invalid || isLoading || !validateTransfer() || accounts.length === 0">
+              {{ isLoading ? 'Processando transferência...' : 'Confirmar Transferência' }}
+            </button>
+          </div>
+
+        </form>
+        
+        <!-- Mensagem quando não há contas -->
+        <div *ngIf="accounts.length === 0 && !isLoadingAccounts" class="no-accounts-container">
+          <p>Nenhuma conta disponível para transferência</p>
+        </div>
+      </div>
+    </div>
+
+    <app-back-button text="Voltar" route="/dashboard"></app-back-button>
+  </main>
+</div>

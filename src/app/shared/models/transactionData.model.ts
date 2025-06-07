@@ -1,4 +1,5 @@
 export interface TransactionData {
-  account: string;
+  accountNumberOrigin: string;
+  accountNumberDestin?: string;
   amount: number;
 }

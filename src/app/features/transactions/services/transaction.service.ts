@@ -5,6 +5,8 @@ import { environment } from '../../../../environments/environment';
 import { TransactionData } from '../../../shared/models/transactionData.model';
 import { TransactionResponse } from '../../../shared/models/transactionResponse.model';
 import { StatementResponse } from '../../../shared/models/statement.model';
+import { TransferRequest } from '../../../shared/models/transferRequest.model';
+import { TransferResponse } from '../../../shared/models/transferResponse.model';
 
 @Injectable({ providedIn: 'root' })
 export class TransactionService {
@@ -22,7 +24,7 @@ export class TransactionService {
   deposit(transactionData: TransactionData, customerId: string): Observable<TransactionResponse> {
     return this.http.post<TransactionResponse>(`${this.apiUrl}/deposit`, 
       {
-        accountNumber: transactionData.account,
+        accountNumberOrigin: transactionData.accountNumberOrigin,
         amount: transactionData.amount
       },
       { headers: this.getHeaders(customerId) }
@@ -32,9 +34,16 @@ export class TransactionService {
   withdraw(transactionData: TransactionData, customerId: string): Observable<TransactionResponse> {
     return this.http.post<TransactionResponse>(`${this.apiUrl}/withdraw`, 
       {
-        accountNumber: transactionData.account,
+        accountNumberOrigin: transactionData.accountNumberOrigin,
         amount: transactionData.amount
       },
+      { headers: this.getHeaders(customerId) }
+    );
+  }
+
+  transfer(transferData: TransferRequest, customerId: string): Observable<TransferResponse> {
+    return this.http.post<TransferResponse>(`${this.apiUrl}/transfer`, 
+      transferData, 
       { headers: this.getHeaders(customerId) }
     );
   }

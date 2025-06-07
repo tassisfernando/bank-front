@@ -26,12 +26,14 @@
               <tr>
                 <th>Número da Conta</th>
                 <th>Saldo</th>
+                <th>Limite de Crédito</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let account of accounts">
                 <td>{{ account.accountNumber }}</td>
                 <td>{{ account.balance | currency:'BRL':'symbol':'1.2-2' }}</td>
+                <td>{{ account.creditLimit ? (account.creditLimit | currency:'BRL':'symbol':'1.2-2') : 'Não definido' }}</td>
               </tr>
             </tbody>
           </table>
@@ -42,9 +44,18 @@
           <p class="no-accounts">Nenhuma conta encontrada</p>
         </div>
         
-        <button class="create-account-btn" (click)="createNewAccount()">
-          Criar Nova Conta
+        <button 
+          class="create-account-btn" 
+          (click)="createNewAccount()"
+          [disabled]="isLoading">
+          {{ isLoading ? 'Criando...' : 'Criar Nova Conta' }}
         </button>
+
+        <!-- Componente para alterar limite de crédito -->
+        <app-credit-limit-form 
+          [accounts]="accounts"
+          (creditLimitUpdated)="onCreditLimitUpdated()">
+        </app-credit-limit-form>
       </div>
     </div>
 

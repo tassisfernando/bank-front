@@ -1,34 +1,89 @@
 <div class="dashboard-container">
-  <!-- Header -->
   <app-header></app-header>
-
-  <!-- Main Content -->
+  
   <main class="dashboard-main">
+    <!-- <div class="welcome-section">
+      <h1>Olá, {{ userName }}!</h1>
+      <p>Bem-vindo ao seu banco digital</p>
+    </div> -->
+
     <div class="actions-grid">
-      <button class="action-btn create-account" (click)="createAccount()">
-        <span class="btn-icon">👤</span>
-        <span class="btn-text">Criar Conta</span>
+      <button class="action-card" (click)="createAccount()">
+        <div class="action-icon">🏦</div>
+        <h3>Criar Conta</h3>
+        <p>Abra uma nova conta bancária</p>
+      </button>
+
+      <button class="action-card" (click)="deposit()">
+        <div class="action-icon">💰</div>
+        <h3>Depósito</h3>
+        <p>Deposite dinheiro na sua conta</p>
+      </button>
+
+      <button class="action-card" (click)="withdraw()">
+        <div class="action-icon">💸</div>
+        <h3>Saque</h3>
+        <p>Retire dinheiro da sua conta</p>
+      </button>
+
+      <button class="action-card" (click)="transfer()">
+        <div class="action-icon">🔄</div>
+        <h3>Transferência</h3>
+        <p>Transfira dinheiro entre contas</p>
+      </button>
+
+      <button class="action-card" (click)="viewStatement()">
+        <div class="action-icon">📊</div>
+        <h3>Extrato</h3>
+        <p>Consulte suas transações</p>
       </button>
       
-      <button class="action-btn withdraw" (click)="withdraw()">
-        <span class="btn-icon">💸</span>
-        <span class="btn-text">Sacar</span>
-      </button>
-      
-      <button class="action-btn deposit" (click)="deposit()">
-        <span class="btn-icon">💰</span>
-        <span class="btn-text">Depositar</span>
-      </button>
-      
-      <button class="action-btn statement" (click)="viewStatement()">
-        <span class="btn-icon">📄</span>
-        <span class="btn-text">Ver Extrato</span>
-      </button>
-      
-      <button class="action-btn logout" (click)="logout()">
-        <span class="btn-icon">🚪</span>
-        <span class="btn-text">Sair</span>
+    </div>
+
+    <!-- Erro ao carregar saldo -->
+    <div *ngIf="errorMessage" class="error-section">
+      <p class="error-message">{{ errorMessage }}</p>
+      <button class="retry-btn" (click)="refreshBalance()">
+        Tentar Novamente
       </button>
     </div>
   </main>
+
+  <!-- Seção do Saldo Total (próximo ao footer) -->
+  <footer class="dashboard-footer">
+    <div class="balance-section">
+      <div class="balance-container">
+        <div class="balance-label">Saldo total das contas: </div>
+        
+        <!-- Loading do saldo -->
+        <div *ngIf="isLoadingBalance" class="balance-loading">
+          <span>Carregando...</span>
+        </div>
+        
+        <!-- Saldo carregado -->
+        <div *ngIf="!isLoadingBalance && !errorMessage" class="balance-amount">
+          {{ totalBalance | currency:'BRL':'symbol':'1.2-2' }}
+        </div>
+        
+        <!-- Erro no saldo -->
+        <div *ngIf="!isLoadingBalance && errorMessage" class="balance-error">
+          <span>--</span>
+        </div>
+        
+        <button 
+          class="refresh-balance-btn" 
+          (click)="refreshBalance()"
+          [disabled]="isLoadingBalance"
+          title="Atualizar saldo">
+          🔄
+        </button>
+      </div>
+    </div>
+    
+    <div class="footer-actions">
+      <button class="logout-btn" (click)="logout()">
+        Sair
+      </button>
+    </div>
+  </footer>
 </div>

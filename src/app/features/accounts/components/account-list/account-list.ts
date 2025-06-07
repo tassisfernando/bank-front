@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../../../../shared/components/header/header';
 import { BackButton } from '../../../../shared/components/back-button/back-button';
+import { CreditLimitFormComponent } from '../credit-limit-form/credit-limit-form';
 import { AccountService } from '../../services/account.service';
 import { TokenService } from '../../../../core/services/token.service';
 import { ErrorHandlerService } from '../../../../shared/services/error-handler.service';
@@ -11,7 +12,7 @@ import { AccountRequest } from '../../../../shared/models/accountRequest.model';
 @Component({
   selector: 'app-account-list',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, BackButton],
+  imports: [CommonModule, HeaderComponent, BackButton, CreditLimitFormComponent],
   templateUrl: './account-list.html',
   styleUrls: ['./account-list.scss']
 })
@@ -85,5 +86,10 @@ export class AccountListComponent implements OnInit {
 
   retryLoadAccounts() {
     this.loadAccounts();
+  }
+
+  // Método chamado quando o limite de crédito é atualizado
+  onCreditLimitUpdated() {
+    this.loadAccounts(); // Recarrega as contas para mostrar o novo limite
   }
 }
